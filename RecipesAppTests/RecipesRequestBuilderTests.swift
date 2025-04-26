@@ -7,14 +7,11 @@
 import XCTest
 @testable import RecipesApp
 
-import XCTest
-@testable import RecipesApp
-
 final class RecipesRequestBuilderTests: XCTestCase {
     
     func test_GivenNothing_WhenBuildingRecipesURL_ThenReturnsCorrectURL() {
-        // Given & When
-        let url = RecipesRequestBuilder.buildRecipesURL()
+        // Given
+        let url = RecipesRequestBuilder().buildRecipesURL()
         
         // Then
         XCTAssertNotNil(url)
@@ -35,7 +32,7 @@ final class RecipesRequestBuilderTests: XCTestCase {
         let url = URL(string: "https://tasty.p.rapidapi.com/recipes/list")!
         
         // When
-        let request = RecipesRequestBuilder.buildRequest(using: url)
+        let request = RecipesRequestBuilder().buildRequest(using: url)
         
         // Then
         XCTAssertEqual(request.httpMethod, "GET")

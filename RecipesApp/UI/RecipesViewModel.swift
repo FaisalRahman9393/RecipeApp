@@ -18,7 +18,12 @@ class RecipesViewModel: ObservableObject {
     }
     
     func fetchRecipes() async {
-        await self.recipesService.fetchRecipes()
+        
+        do {
+            try await self.recipesService.fetchRecipes()
+        } catch {
+            // ignore for now
+        }
     }
 }
 

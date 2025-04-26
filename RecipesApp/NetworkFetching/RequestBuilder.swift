@@ -6,9 +6,9 @@
 //
 import Foundation
 
-struct RecipesRequestBuilder {
+struct RecipesRequestBuilder: RequestBuilder {
     
-    static func buildRecipesURL() -> URL? {
+    func buildRecipesURL() -> URL? {
         var urlComponents = URLComponents()
         urlComponents.scheme = "https"
         urlComponents.host = "tasty.p.rapidapi.com"
@@ -21,11 +21,16 @@ struct RecipesRequestBuilder {
         return urlComponents.url
     }
     
-    static func buildRequest(using url: URL) -> URLRequest {
+    func buildRequest(using url: URL) -> URLRequest {
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("tasty.p.rapidapi.com", forHTTPHeaderField: "x-rapidapi-host")
         request.setValue("your-rapidapi-key", forHTTPHeaderField: "x-rapidapi-key")
         return request
     }
+}
+
+protocol RequestBuilder {
+    func buildRequest(using url: URL) -> URLRequest
+    func buildRecipesURL() -> URL?
 }
