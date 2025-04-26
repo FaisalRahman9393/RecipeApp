@@ -34,16 +34,28 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				readme.md,
 			);
 			target = 7748031B2DBCE97D00EF944C /* RecipesApp */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		772675F82DBD01B200248518 /* Exceptions for "RecipesApp" folder in "Compile Sources" phase from "RecipesApp" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = 774803182DBCE97D00EF944C /* Sources */;
+			membershipExceptions = (
+				readme.md,
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		7748031E2DBCE97D00EF944C /* RecipesApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				774803442DBCE97E00EF944C /* Exceptions for "RecipesApp" folder in "RecipesApp" target */,
+				772675F82DBD01B200248518 /* Exceptions for "RecipesApp" folder in "Compile Sources" phase from "RecipesApp" target */,
 			);
 			path = RecipesApp;
 			sourceTree = "<group>";
