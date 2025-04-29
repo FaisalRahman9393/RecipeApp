@@ -8,8 +8,9 @@
 import Combine
 import Foundation
 
+@MainActor
 class RecipesViewModel: ObservableObject {
-    
+    @Published var isLoading: Bool = true
     @Published var recipes: [Recipe] = []
     let recipesService: RecipesService
     
@@ -18,12 +19,13 @@ class RecipesViewModel: ObservableObject {
     }
     
     func fetchRecipes() async {
-        
+        isLoading = true
         do {
             recipes = try await self.recipesService.fetchRecipes()
         } catch {
             // ignore for now
         }
+        isLoading = false
     }
 }
 

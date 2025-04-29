@@ -34,6 +34,8 @@ We will not use any of this code for any of Rightmove's applications.
 
 - Url components and request decrators can be inject through a config, this would allow for reuse and better testing
 
+- No failure states atm: No network screen? Server error? 
+
 TODO:
 
 /- show a list of recipes 
