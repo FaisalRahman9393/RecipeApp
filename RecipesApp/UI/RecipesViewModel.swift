@@ -20,7 +20,7 @@ class RecipesViewModel: ObservableObject {
     func fetchRecipes() async {
         
         do {
-            try await self.recipesService.fetchRecipes()
+            recipes = try await self.recipesService.fetchRecipes()
         } catch {
             // ignore for now
         }

@@ -8,6 +8,9 @@ import Foundation
 
 struct RecipesRequestBuilder: RequestBuilder {
     
+    //TODO: store this safely
+    private let rapidAPIKey = "af40cd5728msh9b20903038b29aep1adcd2jsn63bfdfa76c67"
+    
     func buildRecipesURL() -> URL? {
         var urlComponents = URLComponents()
         urlComponents.scheme = "https"
@@ -25,7 +28,7 @@ struct RecipesRequestBuilder: RequestBuilder {
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("tasty.p.rapidapi.com", forHTTPHeaderField: "x-rapidapi-host")
-        request.setValue("your-rapidapi-key", forHTTPHeaderField: "x-rapidapi-key")
+        request.setValue(rapidAPIKey, forHTTPHeaderField: "x-rapidapi-key")
         return request
     }
 }

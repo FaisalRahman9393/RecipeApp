@@ -23,8 +23,10 @@ struct RecipesServiceImpl: RecipesService {
         }
         let request = requestBuilder.buildRequest(using: url)
         let data = try await fetcher.fetch(request: request)
+        
         let results = try JSONDecoder().decode(RecipesResponse.self, from: data).results
-
+        
+        print(results)
         return results.compactMap { Recipe(name: $0.name, image: "") }
     }
 }
