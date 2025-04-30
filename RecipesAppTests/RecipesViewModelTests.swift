@@ -1,3 +1,10 @@
+//
+//  RecipesViewModelTests.swift
+//  RecipesAppTests
+//
+//  Created by Faisal Rahman on 30/04/2025.
+//
+
 import XCTest
 import Combine
 @testable import RecipesApp
@@ -22,8 +29,8 @@ final class RecipesViewModelTests: XCTestCase {
         // Given
         let mockService = MockRecipesService()
         mockService.recipesToReturn = [
-            Recipe(name: "pizza", image: ""),
-            Recipe(name: "burger", image: "")
+            makeRecipe(name: "pizza"),
+            makeRecipe(name: "burger")
         ]
         let sut = RecipesViewModel(recipesService: mockService)
         
@@ -53,7 +60,7 @@ final class RecipesViewModelTests: XCTestCase {
     func testGivenInitialState_WhenFetchRecipesIsCalled_ThenIsLoadingTransitionsFromTrueToFalse() async {
         // Given
         let mockService = MockRecipesService()
-        mockService.recipesToReturn = [Recipe(name: "pizza", image: "")]
+        mockService.recipesToReturn = [makeRecipe(name: "pizza")]
         let sut = RecipesViewModel(recipesService: mockService)
         
         var didObserveLoadingState: [Bool] = []
@@ -78,7 +85,7 @@ extension RecipesViewModelTests {
     func testWhenFavouriteIsCalled_ThenRecipeIsAddedToFavourites() {
         // Given
         let mockPersistence = MockPersistenceService()
-        let recipe = Recipe(name: "pizza", image: "")
+        let recipe = makeRecipe(name: "pizza")
         let sut = RecipesViewModel(
             recipesService: MockRecipesService(),
             persistenceService: mockPersistence
@@ -95,7 +102,7 @@ extension RecipesViewModelTests {
     func testGivenRecipeIsFavourited_WhenUnfavouriteIsCalled_ThenRecipeIsRemovedFromFavourites() {
         // Given
         let mockPersistence = MockPersistenceService()
-        let recipe = Recipe(name: "pizza", image: "")
+        let recipe = makeRecipe(name: "pizza")
         mockPersistence.addFavourite(recipe)
         let sut = RecipesViewModel(
             recipesService: MockRecipesService(),
@@ -113,7 +120,7 @@ extension RecipesViewModelTests {
     func testGivenARecipesIsFavourited_WhenIsFavouriteIsCalled_ThenCorrectBooleanIsReturned() {
         // Given
         let mockPersistence = MockPersistenceService()
-        let favouritedRecipe = Recipe(name: "burger", image: "")
+        let favouritedRecipe = makeRecipe(name: "burger")
         mockPersistence.addFavourite(favouritedRecipe)
         let sut = RecipesViewModel(
             recipesService: MockRecipesService(),
@@ -133,7 +140,7 @@ extension RecipesViewModelTests {
         )
 
         // When / Then
-        XCTAssertFalse(sut.isFavourite(Recipe(name: "burger", image: "")))
+        XCTAssertFalse(sut.isFavourite(makeRecipe(name: "burger")))
         XCTAssertTrue(mockPersistence.storedFavourites.isEmpty)
     }
 }

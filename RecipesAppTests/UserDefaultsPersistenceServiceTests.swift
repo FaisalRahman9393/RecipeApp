@@ -4,7 +4,6 @@
 //
 //  Created by Faisal Rahman on 30/04/2025.
 //
-
 import Foundation
 @testable import RecipesApp
 import XCTest
@@ -31,44 +30,63 @@ final class UserDefaultsPersistenceServiceTests: XCTestCase {
 
     func testGivenEmptyFavourites_WhenAddFavouriteIsCalled_ThenRecipeIsStored() {
         // Given
-        let recipe = Recipe(name: "Pizza", image: "")
+        let recipe = makeRecipe(name: "pizza")
         // When
         sut.addFavourite(recipe)
         // Then
-        XCTAssertTrue(mockDefaults.stringArray(forKey: "favouriteRecipes")?.contains("Pizza") ?? false)
+        let result = sut.getFavourites()
+        XCTAssertTrue(result.contains(where: { $0.name == "pizza" }))
     }
 
     func testGivenStoredFavourites_WhenRemoveFavouriteIsCalled_ThenRecipeIsRemoved() {
         // Given
-        let recipe = Recipe(name: "Pizza", image: "")
+        let recipe = makeRecipe(name: "pizza")
         sut.addFavourite(recipe)
         // When
         sut.removeFavourite(recipe)
         // Then
-        XCTAssertFalse(mockDefaults.stringArray(forKey: "favouriteRecipes")?.contains("Pizza") ?? true)
+        let result = sut.getFavourites()
+        XCTAssertFalse(result.contains(where: { $0.name == "pizza" }))
     }
 
     func testGivenStoredRecipe_WhenIsFavouriteIsCalled_ThenReturnsTrue() {
         // Given
-        let recipe = Recipe(name: "Pizza", image: "")
-        // When
+        let recipe = makeRecipe(name: "pizza")
         sut.addFavourite(recipe)
+        // When
+        let isFav = sut.isFavourite(recipe)
         // Then
-        XCTAssertTrue(sut.isFavourite(recipe))
+        XCTAssertTrue(isFav)
     }
 
     func testGivenNoStoredRecipe_WhenIsFavouriteIsCalled_ThenReturnsFalse() {
-        let recipe = Recipe(name: "Sushi", image: "")
-        XCTAssertFalse(sut.isFavourite(recipe))
+        // Given
+        let recipe = makeRecipe(name: "burger")
+        // When
+        let isFav = sut.isFavourite(recipe)
+        // Then
+        XCTAssertFalse(isFav)
     }
 
     func testGivenMultipleRecipesStored_WhenGetFavouritesIsCalled_ThenReturnsAllRecipes() {
         // Given
-        sut.addFavourite(Recipe(name: "Curry", image: ""))
-        sut.addFavourite(Recipe(name: "Stew", image: ""))
+        sut.addFavourite(makeRecipe(name: "pizza"))
+        sut.addFavourite(makeRecipe(name: "burger"))
         // When
         let result = sut.getFavourites().map { $0.name }.sorted()
         // Then
-        XCTAssertEqual(result, ["Curry", "Stew"])
+        XCTAssertEqual(result, ["burger", "pizza"])
     }
+}
+
+func makeRecipe(id: Int = .random(in: 1...10000),
+                name: String = "pizza",
+                image: String? = "testImage",
+                description: String? = "testDescription",
+                instructions: [String] = ["testInstruction"],
+                calories: Int? = 100,
+                fat: Int? = 10,
+                protein: Int? = 5,
+                carbs: Int? = 20) -> Recipe {
+    return Recipe(id: id, name: name, image: image, description: description, instructions: instructions, calories: calories, fat: fat, protein: protein, carbs: carbs)
 }

@@ -26,19 +26,59 @@ struct RecipesServiceImpl: RecipesService {
         
         let results = try JSONDecoder().decode(RecipesResponse.self, from: data).results
         
-        print(results)
-        return results.compactMap { Recipe(name: $0.name, image: "") }
-    }
-}
-
-struct RecipesResponse: Decodable {
-    let results: [Recipe]
-    
-    struct Recipe: Decodable {
-        let name: String
+        return results.compactMap { Recipe(id: $0.id,
+                                           name: $0.name,
+                                           image: $0.thumbnailURL,
+                                           description: $0.description,
+                                           instructions: $0.instructions.map { $0.displayText },
+                                           calories: $0.nutrition?.calories,
+                                           fat: $0.nutrition?.fat,
+                                           protein: $0.nutrition?.protein,
+                                           carbs: $0.nutrition?.carbohydrates)
+        }
     }
 }
 
 protocol RecipesService {
     func fetchRecipes() async throws -> [Recipe]
+}
+
+
+struct RecipesResponse: Decodable {
+    let results: [Recipe]
+    
+    struct Recipe: Decodable, Identifiable {
+        let id: Int
+        let name: String
+        let description: String?
+        let thumbnailURL: String?
+        let instructions: [Instruction]
+        let nutrition: Nutrition?
+
+        enum CodingKeys: String, CodingKey {
+            case id
+            case name
+            case description
+            case thumbnailURL = "thumbnail_url"
+            case instructions
+            case nutrition
+        }
+    }
+    
+    struct Instruction: Decodable {
+        let displayText: String
+        
+        enum CodingKeys: String, CodingKey {
+            case displayText = "display_text"
+        }
+    }
+    
+    struct Nutrition: Decodable {
+        let calories: Int?
+        let fat: Int?
+        let protein: Int?
+        let sugar: Int?
+        let carbohydrates: Int?
+        let fiber: Int?
+    }
 }

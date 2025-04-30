@@ -21,7 +21,9 @@ class RecipeDetailViewController: UIViewController {
     
     private var isFavorite: Bool = false {
         didSet {
-            navigationItem.rightBarButtonItem?.title = isFavorite ? "Unfavorite" : "Favorite"
+            let heartImageName = isFavorite ? "heart.fill" : "heart"
+            let heartImage = UIImage(systemName: heartImageName)
+            navigationItem.rightBarButtonItem?.image = heartImage
         }
     }
     
@@ -48,8 +50,10 @@ class RecipeDetailViewController: UIViewController {
     }
     
     private func setupNavBar() {
+        let heartImageName = isFavorite ? "heart.fill" : "heart"
+        let heartImage = UIImage(systemName: heartImageName)
         navigationItem.rightBarButtonItem = UIBarButtonItem(
-            title: "Favorite",
+            image: heartImage,
             style: .plain,
             target: self,
             action: #selector(toggleFavorite)

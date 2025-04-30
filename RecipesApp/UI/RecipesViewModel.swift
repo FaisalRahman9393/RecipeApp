@@ -49,8 +49,14 @@ class RecipesViewModel: ObservableObject {
      }
 }
 
-struct Recipe: Identifiable, Equatable {
-    let id = UUID()
+struct Recipe: Codable, Equatable {
+    let id: Int
     let name: String
-    let image: String
+    let image: String?
+    let description: String?
+    let instructions: [String]
+    let calories: Int?
+    let fat: Int?
+    let protein: Int?
+    let carbs: Int?
 }
