@@ -15,8 +15,8 @@ class RecipeDetailViewController: UIViewController {
     private let contentView = UIStackView()
     private let recipeImageView = UIImageView()
     private let descriptionLabel = UILabel()
-    private let ingredientsTitleLabel = UILabel()
-    private let ingredientsListLabel = UILabel()
+    private let instructionsTitleLabel = UILabel()
+    private let instructions = UILabel()
     private let viewModel: RecipesViewModel
     
     private var isFavorite: Bool = false {
@@ -47,6 +47,21 @@ class RecipeDetailViewController: UIViewController {
         setupScrollView()
         setupContent()
         loadRecipeData()
+    }
+    
+    private func loadRecipeData() {
+        recipeImageView.backgroundColor = .lightGray
+        isFavorite = viewModel.isFavourite(recipe)
+        
+        descriptionLabel.text = recipe.description
+        
+        let bullet = "• "
+        let formattedInstructions = recipe.instructions
+            .filter { !$0.isEmpty }
+            .map { "\(bullet)\($0)" }
+            .joined(separator: "\n\n")
+        
+        instructions.text = formattedInstructions
     }
     
     private func setupNavBar() {
@@ -80,22 +95,23 @@ class RecipeDetailViewController: UIViewController {
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         
         contentView.axis = .vertical
         contentView.spacing = 16
         contentView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.addSubview(contentView)
-        
+
         NSLayoutConstraint.activate([
             contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
-            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
-            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
-            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 16),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -16),
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor, constant: -32),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor)
         ])
     }
+
     
     private func setupContent() {
         recipeImageView.contentMode = .scaleAspectFill
@@ -108,33 +124,15 @@ class RecipeDetailViewController: UIViewController {
         descriptionLabel.numberOfLines = 0
         contentView.addArrangedSubview(descriptionLabel)
         
-        ingredientsTitleLabel.font = UIFont.preferredFont(forTextStyle: .headline)
-        ingredientsTitleLabel.adjustsFontForContentSizeCategory = true
-        ingredientsTitleLabel.numberOfLines = 0
-        ingredientsTitleLabel.text = "Ingredients"
-        contentView.addArrangedSubview(ingredientsTitleLabel)
+        instructionsTitleLabel.font = UIFont.preferredFont(forTextStyle: .headline)
+        instructionsTitleLabel.adjustsFontForContentSizeCategory = true
+        instructionsTitleLabel.numberOfLines = 0
+        instructionsTitleLabel.text = "Instructions"
+        contentView.addArrangedSubview(instructionsTitleLabel)
         
-        ingredientsListLabel.font = UIFont.preferredFont(forTextStyle: .body)
-        ingredientsListLabel.adjustsFontForContentSizeCategory = true
-        ingredientsListLabel.numberOfLines = 0
-        contentView.addArrangedSubview(ingredientsListLabel)
-    }
-
-    private func loadRecipeData() {
-        recipeImageView.backgroundColor = .lightGray
-        isFavorite = viewModel.isFavourite(recipe)
-        
-        descriptionLabel.text = "A really really really really really really really really really really really really really really really really really really really really really really really really really really really really long description label"
-        
-        ingredientsListLabel.text = """
-        • Ingredient
-        • Ingredient
-        • Ingredient
-        • Ingredient
-        • Ingredient
-        • Ingredient
-        • Ingredient
-        • Ingredient
-        """
+        instructions.font = UIFont.preferredFont(forTextStyle: .body)
+        instructions.adjustsFontForContentSizeCategory = true
+        instructions.numberOfLines = 0
+        contentView.addArrangedSubview(instructions)
     }
 }
