@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import Combine
 
 class RecipeDetailViewController: UIViewController {
     private let recipe: Recipe
@@ -16,11 +17,17 @@ class RecipeDetailViewController: UIViewController {
     private let descriptionLabel = UILabel()
     private let ingredientsTitleLabel = UILabel()
     private let ingredientsListLabel = UILabel()
+    private let viewModel: RecipesViewModel
     
-    private var isFavorite = false
-
-    init(recipe: Recipe) {
+    private var isFavorite: Bool = false {
+        didSet {
+            navigationItem.rightBarButtonItem?.title = isFavorite ? "Unfavorite" : "Favorite"
+        }
+    }
+    
+    init(recipe: Recipe, viewModel: RecipesViewModel) {
         self.recipe = recipe
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -50,11 +57,15 @@ class RecipeDetailViewController: UIViewController {
     }
     
     @objc private func toggleFavorite() {
-        isFavorite.toggle()
-        navigationItem.rightBarButtonItem?.title = isFavorite ? "Unfavorite" : "Favorite"
-        
 
-        //TODO: ...
+        if isFavorite {
+            viewModel.unfavourite(recipe)
+            isFavorite = false
+        } else {
+            viewModel.favourite(recipe)
+            isFavorite = true
+        }
+
     }
     
     private func setupScrollView() {
@@ -107,6 +118,7 @@ class RecipeDetailViewController: UIViewController {
 
     private func loadRecipeData() {
         recipeImageView.backgroundColor = .lightGray
+        isFavorite = viewModel.isFavourite(recipe)
         
         descriptionLabel.text = "A really really really really really really really really really really really really really really really really really really really really really really really really really really really really long description label"
         

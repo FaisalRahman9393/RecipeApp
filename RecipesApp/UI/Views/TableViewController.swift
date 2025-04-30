@@ -34,7 +34,6 @@ class TableViewController: UITableViewController {
         Task {
             await viewModel.fetchRecipes()
         }
-        
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -42,8 +41,8 @@ class TableViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let recipe = recipes[indexPath.row]
-        let detailVC = RecipeDetailViewController(recipe: recipe)
+        let recipe = viewModel.recipes[indexPath.row]
+        let detailVC = RecipeDetailViewController(recipe: recipe, viewModel: viewModel)
         navigationController?.pushViewController(detailVC, animated: true)
     }
     

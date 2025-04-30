@@ -12,7 +12,6 @@ final class RecipesRequestBuilderTests: XCTestCase {
     func test_GivenNothing_WhenBuildingRecipesURL_ThenReturnsCorrectURL() {
         // Given
         let url = RecipesRequestBuilder().buildRecipesURL()
-        
         // Then
         XCTAssertNotNil(url)
         XCTAssertEqual(url?.scheme, "https")
@@ -30,13 +29,11 @@ final class RecipesRequestBuilderTests: XCTestCase {
     func test_GivenURL_WhenBuildingRequest_ThenReturnsRequestWithCorrectHeaders() {
         // Given
         let url = URL(string: "https://tasty.p.rapidapi.com/recipes/list")!
-        
         // When
         let request = RecipesRequestBuilder().buildRequest(using: url)
-        
         // Then
         XCTAssertEqual(request.httpMethod, "GET")
         XCTAssertEqual(request.value(forHTTPHeaderField: "x-rapidapi-host"), "tasty.p.rapidapi.com")
-        XCTAssertEqual(request.value(forHTTPHeaderField: "x-rapidapi-key"), "your-rapidapi-key")
+        XCTAssertEqual(request.value(forHTTPHeaderField: "x-rapidapi-key"), "af40cd5728msh9b20903038b29aep1adcd2jsn63bfdfa76c67")
     }
 }

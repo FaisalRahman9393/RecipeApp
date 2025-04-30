@@ -1,10 +1,3 @@
-//
-//  RecipesViewModelTests.swift
-//  RecipesAppTests
-//
-//  Created by Faisal Rahman on 29/04/2025.
-//
-
 import XCTest
 import Combine
 @testable import RecipesApp
@@ -25,57 +18,122 @@ final class RecipesViewModelTests: XCTestCase {
         super.tearDown()
     }
 
-    func testGivenServiceIsSetToLoadWithSuccess_thenViewModelLoadsWithCorrectRecipes() async {
+    func testGivenServiceSucceeds_WhenFetchRecipesIsCalled_ThenRecipesArePopulatedCorrectly() async {
         // Given
         let mockService = MockRecipesService()
         mockService.recipesToReturn = [
-            Recipe(name: "Tomato sauce", image: ""),
-            Recipe(name: "Mac and Cheese", image: "")
+            Recipe(name: "pizza", image: ""),
+            Recipe(name: "burger", image: "")
         ]
-        let viewModel = RecipesViewModel(recipesService: mockService)
+        let sut = RecipesViewModel(recipesService: mockService)
         
         // When
-        await viewModel.fetchRecipes()
+        await sut.fetchRecipes()
         
         // Then
-        XCTAssertEqual(viewModel.recipes.count, 2)
-        XCTAssertEqual(viewModel.recipes.first?.name, "Tomato sauce")
-        XCTAssertFalse(viewModel.isLoading)
+        XCTAssertEqual(sut.recipes.count, 2)
+        XCTAssertEqual(sut.recipes.first?.name, "pizza")
+        XCTAssertFalse(sut.isLoading)
     }
 
-    func testGivenServiceFailsToLoad_thenViewModelReturnsEmptyRecipes() async {
+    func testGivenServiceFails_WhenFetchRecipesIsCalled_ThenRecipesAreEmptyAndLoadingIsFalse() async {
         // Given
         let mockService = MockRecipesService()
         mockService.shouldThrowError = true
-        let viewModel = RecipesViewModel(recipesService: mockService)
+        let sut = RecipesViewModel(recipesService: mockService)
 
         // When
-        await viewModel.fetchRecipes()
+        await sut.fetchRecipes()
 
         // Then
-        XCTAssertTrue(viewModel.recipes.isEmpty)
-        XCTAssertFalse(viewModel.isLoading)
+        XCTAssertTrue(sut.recipes.isEmpty)
+        XCTAssertFalse(sut.isLoading)
     }
 
-    func testGivenServiceLoadsSuccessfully_thenIsLoadingTogglesFromTrueToFalse() async {
+    func testGivenInitialState_WhenFetchRecipesIsCalled_ThenIsLoadingTransitionsFromTrueToFalse() async {
         // Given
         let mockService = MockRecipesService()
-        mockService.recipesToReturn = [Recipe(name: "Tomato sauce", image: "")]
-        let viewModel = RecipesViewModel(recipesService: mockService)
+        mockService.recipesToReturn = [Recipe(name: "pizza", image: "")]
+        let sut = RecipesViewModel(recipesService: mockService)
         
         var didObserveLoadingState: [Bool] = []
         
-        viewModel.$isLoading
+        sut.$isLoading
             .dropFirst()
             .sink { isLoading in
-            didObserveLoadingState.append(isLoading)
-        }.store(in: &cancellables)
+                didObserveLoadingState.append(isLoading)
+            }.store(in: &cancellables)
         
         // When
-        await viewModel.fetchRecipes()
+        await sut.fetchRecipes()
 
         // Then
-        XCTAssert(didObserveLoadingState == [true, false])
-        
+        XCTAssertEqual(didObserveLoadingState, [true, false])
+    }
+}
+
+// MARK: - Persistence Tests
+extension RecipesViewModelTests {
+
+    func testWhenFavouriteIsCalled_ThenRecipeIsAddedToFavourites() {
+        // Given
+        let mockPersistence = MockPersistenceService()
+        let recipe = Recipe(name: "pizza", image: "")
+        let sut = RecipesViewModel(
+            recipesService: MockRecipesService(),
+            persistenceService: mockPersistence
+        )
+
+        // When
+        sut.favourite(recipe)
+
+        // Then
+        XCTAssertTrue(mockPersistence.isFavourite(recipe))
+        XCTAssertEqual(sut.favouriteRecipes, [recipe])
+    }
+
+    func testGivenRecipeIsFavourited_WhenUnfavouriteIsCalled_ThenRecipeIsRemovedFromFavourites() {
+        // Given
+        let mockPersistence = MockPersistenceService()
+        let recipe = Recipe(name: "pizza", image: "")
+        mockPersistence.addFavourite(recipe)
+        let sut = RecipesViewModel(
+            recipesService: MockRecipesService(),
+            persistenceService: mockPersistence
+        )
+
+        // When
+        sut.unfavourite(recipe)
+
+        // Then
+        XCTAssertFalse(mockPersistence.isFavourite(recipe))
+        XCTAssertTrue(sut.favouriteRecipes.isEmpty)
+    }
+
+    func testGivenARecipesIsFavourited_WhenIsFavouriteIsCalled_ThenCorrectBooleanIsReturned() {
+        // Given
+        let mockPersistence = MockPersistenceService()
+        let favouritedRecipe = Recipe(name: "burger", image: "")
+        mockPersistence.addFavourite(favouritedRecipe)
+        let sut = RecipesViewModel(
+            recipesService: MockRecipesService(),
+            persistenceService: mockPersistence
+        )
+
+        // When / Then
+        XCTAssertTrue(sut.isFavourite(favouritedRecipe))
+    }
+    
+    func testGivenARecipesIsNOTFavourited_WhenIsFavouriteIsCalled_ThenCorrectBooleanIsReturned() {
+        // Given
+        let mockPersistence = MockPersistenceService()
+        let sut = RecipesViewModel(
+            recipesService: MockRecipesService(),
+            persistenceService: mockPersistence
+        )
+
+        // When / Then
+        XCTAssertFalse(sut.isFavourite(Recipe(name: "burger", image: "")))
+        XCTAssertTrue(mockPersistence.storedFavourites.isEmpty)
     }
 }
