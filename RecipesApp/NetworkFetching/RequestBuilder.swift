@@ -8,7 +8,6 @@ import Foundation
 
 struct RecipesRequestBuilder: RequestBuilder {
     
-    //TODO: store this safely
     private let rapidAPIKey = "af40cd5728msh9b20903038b29aep1adcd2jsn63bfdfa76c67"
     
     func buildRecipesURL() -> URL? {

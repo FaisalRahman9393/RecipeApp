@@ -48,8 +48,11 @@ class RecipeDetailViewController: UIViewController {
         setupContent()
         loadRecipeData()
     }
-    
-    private func loadRecipeData() {
+}
+
+// MARK: private methods
+private extension RecipeDetailViewController {
+    func loadRecipeData() {
         recipeImageView.backgroundColor = .lightGray
         isFavorite = viewModel.isFavourite(recipe)
         
@@ -70,7 +73,17 @@ class RecipeDetailViewController: UIViewController {
         }
     }
     
-    private func setupNavBar() {
+    @objc func toggleFavorite() {
+        if isFavorite {
+            viewModel.unfavourite(recipe)
+            isFavorite = false
+        } else {
+            viewModel.favourite(recipe)
+            isFavorite = true
+        }
+    }
+    
+    func setupNavBar() {
         let heartImageName = isFavorite ? "heart.fill" : "heart"
         let heartImage = UIImage(systemName: heartImageName)
         navigationItem.rightBarButtonItem = UIBarButtonItem(
@@ -81,19 +94,7 @@ class RecipeDetailViewController: UIViewController {
         )
     }
     
-    @objc private func toggleFavorite() {
-
-        if isFavorite {
-            viewModel.unfavourite(recipe)
-            isFavorite = false
-        } else {
-            viewModel.favourite(recipe)
-            isFavorite = true
-        }
-
-    }
-    
-    private func setupScrollView() {
+    func setupScrollView() {
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(scrollView)
         
@@ -118,7 +119,6 @@ class RecipeDetailViewController: UIViewController {
         ])
     }
 
-    
     private func setupContent() {
         recipeImageView.contentMode = .scaleAspectFill
         recipeImageView.clipsToBounds = true

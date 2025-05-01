@@ -38,14 +38,14 @@ final class RecipesViewModelTests: XCTestCase {
         await sut.fetchRecipes()
 
         // Then
-        let favourited = sut.recipeSections.first(where: { $0.type == .favourited})
-        let others =  sut.recipeSections.first(where: { $0.type == .other})
+        let favourited = sut.recipeSections.first(where: { $0.type == .favourited })
+        let others = sut.recipeSections.first(where: { $0.type == .other })
 
         XCTAssertEqual(favourited?.recipes.count, 0)
         XCTAssertEqual(others?.recipes.count, 2)
     }
 
-    func testGivenServiceFails_WhenFetchRecipesIsCalled_ThenSectionsAreEmptyAndLoadingIsFalse() async {
+    func testGivenServiceFails_WhenFetchRecipesIsCalled_ThenErrorSectionIsShown() async {
         // Given
         let mockService = MockRecipesService()
         mockService.shouldThrowError = true
@@ -55,12 +55,16 @@ final class RecipesViewModelTests: XCTestCase {
         await sut.fetchRecipes()
 
         // Then
-        let favourited = sut.recipeSections.first(where: { $0.type == .favourited})
-        let other = sut.recipeSections.first(where: { $0.type == .other})
+        let errorSection = sut.recipeSections.first(where: {
+            if case .error = $0.type { return true }
+            return false
+        })
 
-        XCTAssert(favourited?.recipes.isEmpty == true)
-        XCTAssert(other?.recipes.isEmpty == true)
-        XCTAssertEqual(sut.networkFetchFailure, "Failed to fetch new recipes :(")
+        if case let .error(message) = errorSection?.type {
+            XCTAssertEqual(message, "It looks like we failed to fetch new recipes. Feel free to view the favourited recipes or tap here to try again!")
+        } else {
+            XCTFail("Expected error section")
+        }
     }
 
     func testGivenInitialState_WhenFetchRecipesIsCalled_ThenIsLoadingTransitionsFromTrueToFalse() async {
@@ -70,13 +74,13 @@ final class RecipesViewModelTests: XCTestCase {
         let sut = RecipesViewModel(recipesService: mockService, persistenceService: MockPersistenceService())
 
         var didObserveLoadingState: [Bool] = []
-        
+
         sut.$isLoading
             .dropFirst()
             .sink { isLoading in
                 didObserveLoadingState.append(isLoading)
             }.store(in: &cancellables)
-        
+
         // When
         await sut.fetchRecipes()
 

@@ -10,35 +10,20 @@ import Combine
 
 class TableViewController: UITableViewController {
     
-    let viewModel = RecipesViewModel()
-    
+    private let viewModel = RecipesViewModel()
     private var cancellables: [AnyCancellable] = []
     
-    private var recipeSections: [RecipeSection] = [] {
-        didSet {
-            tableView.reloadData()
-        }
-    }
-    
-    private var networkFailureMessage: String? {
-        didSet {
-            tableView.reloadData()
-        }
-    }
+    private var recipeSections: [RecipeSection] = []
     
     private let spinner = UIActivityIndicatorView(style: .large)
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        self.title = "Recipes"
-        
+        title = "Recipes"
+        registerCells()
         setupLoadingSpinner()
         bindViewModel()
-        
-        Task {
-            await viewModel.fetchRecipes()
-        }
+        fetchRecipes()
     }
     
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -46,20 +31,19 @@ class TableViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if networkFailureMessage != nil, section == 1 {
+        switch recipeSections[section].type {
+        case .error:
             return 1
+        case .favourited, .other:
+            return recipeSections[section].recipes.count
         }
-        
-        return recipeSections[section].recipes.count
     }
     
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        if networkFailureMessage != nil, indexPath.section == 1 {
+        if case .error = recipeSections[indexPath.section].type {
             return 200
         }
-        
         return UITableView.automaticDimension
-        
     }
     
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
@@ -67,41 +51,37 @@ class TableViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let section = recipeSections[indexPath.section]
         
-        if networkFailureMessage != nil, indexPath.section == 1 {
-            // no need to handle error cell for now
-            return
+        switch section.type {
+        case .error: fetchRecipes()
+        case .favourited, .other:
+            let recipe = section.recipes[indexPath.row]
+            let detailVC = RecipeDetailViewController(recipe: recipe, viewModel: viewModel)
+            navigationController?.pushViewController(detailVC, animated: true)
         }
-        
-        let recipe = recipeSections[indexPath.section].recipes[indexPath.row]
-        let detailVC = RecipeDetailViewController(recipe: recipe, viewModel: viewModel)
-        navigationController?.pushViewController(detailVC, animated: true)
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "SubtitleCell") ??
-            UITableViewCell(style: .subtitle, reuseIdentifier: "SubtitleCell")
+        let section = recipeSections[indexPath.section]
         
-        if networkFailureMessage != nil, indexPath.section == 1 {
-            return showErrorCell(cell)
+        switch section.type {
+        case .error(let message):
+            return makeErrorCell(message, at: indexPath)
+            
+        case .favourited, .other:
+            let recipe = section.recipes[indexPath.row]
+            return makeRecipeCell(for: recipe, at: indexPath)
         }
-        
-        let recipe = recipeSections[indexPath.section].recipes[indexPath.row]
-        cell.textLabel?.text = recipe.name
-        
-        cell.detailTextLabel?.text = "Calories: \(recipe.calories)"
-        return cell
     }
-    
 }
 
-// MARK: - Private Methods
+// MARK: - Private Helpers
+
 private extension TableViewController {
-    
     func bindViewModel() {
-        bindRecipeSections()
         bindLoadingState()
-        bindFailureState()
+        bindRecipeSections()
     }
     
     func bindRecipeSections() {
@@ -109,6 +89,7 @@ private extension TableViewController {
             .receive(on: RunLoop.main)
             .sink { [weak self] sections in
                 self?.recipeSections = sections
+                self?.tableView.reloadData()
             }
             .store(in: &cancellables)
     }
@@ -122,33 +103,39 @@ private extension TableViewController {
             .store(in: &cancellables)
     }
     
-    func bindFailureState() {
-        viewModel.$networkFetchFailure
-            .receive(on: RunLoop.main)
-            .sink { [weak self] message in
-                self?.networkFailureMessage = message
-            }
-            .store(in: &cancellables)
-    }
-    
-    func showErrorCell(_ cell: UITableViewCell) -> UITableViewCell {
-        var config = cell.defaultContentConfiguration()
-        config.text = self.networkFailureMessage
-        config.textProperties.color = .systemRed
-        config.textProperties.alignment = .center
-        cell.contentConfiguration = config
-        cell.selectionStyle = .none
-        cell.separatorInset = UIEdgeInsets(top: 0, left: UIScreen.main.bounds.width, bottom: 0, right: 0)
-        return cell
-    }
-    
     func setupLoadingSpinner() {
         spinner.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(spinner)
-        
         NSLayoutConstraint.activate([
             spinner.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
             spinner.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor)
         ])
+    }
+    
+    func fetchRecipes() {
+        Task {
+            await viewModel.fetchRecipes()
+        }
+    }
+    
+    func registerCells() {
+        tableView.register(ErrorTableViewCell.self, forCellReuseIdentifier: ErrorTableViewCell.reuseIdentifier)
+        tableView.register(RecipeTableViewCell.self, forCellReuseIdentifier: RecipeTableViewCell.reuseIdentifier)
+    }
+    
+    func makeErrorCell(_ message: String, at indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: ErrorTableViewCell.reuseIdentifier, for: indexPath) as? ErrorTableViewCell else {
+            return UITableViewCell()
+        }
+        cell.configure(message: message)
+        return cell
+    }
+
+    func makeRecipeCell(for recipe: Recipe, at indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: RecipeTableViewCell.reuseIdentifier, for: indexPath) as? RecipeTableViewCell else {
+            return UITableViewCell()
+        }
+        cell.configure(with: recipe)
+        return cell
     }
 }

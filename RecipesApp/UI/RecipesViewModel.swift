@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  RecipesViewModel.swift
 //  RecipesApp
 //
 //  Created by Faisal Rahman on 26/04/2025.
@@ -11,40 +11,46 @@ import Foundation
 class RecipesViewModel: ObservableObject {
     @Published var isLoading: Bool = true
     @Published var recipeSections: [RecipeSection] = []
-    @Published var networkFetchFailure: String?
     
     private var favouriteRecipes: [Recipe] = []
     private var fetchedRecipes: [Recipe] = []
-
+    
     private let recipesService: RecipesService
     private let persistenceService: PersistenceService
-    private var cancellables: Set<AnyCancellable> = []
-
+    private let errorText = "It looks like we failed to fetch new recipes. Feel free to view the favourited recipes or tap here to try again!"
+    
     init(recipesService: RecipesService = RecipesServiceImpl(),
          persistenceService: PersistenceService = UserDefaultsPersistenceService()) {
         self.recipesService = recipesService
         self.persistenceService = persistenceService
     }
-
+    
     func fetchRecipes() async {
         isLoading = true
+        
         do {
             self.fetchedRecipes = try await recipesService.fetchRecipes()
+            self.favouriteRecipes = persistenceService.getFavourites()
+            updateSections()
         } catch {
-            self.networkFetchFailure = "Failed to fetch new recipes :("
+            self.fetchedRecipes = []
+            self.favouriteRecipes = persistenceService.getFavourites()
+            
+            recipeSections = [
+                RecipeSection(type: .favourited, recipes: favouriteRecipes),
+                RecipeSection(type: .error(errorText), recipes: [])
+            ]
         }
         
-        self.favouriteRecipes = persistenceService.getFavourites()
-        updateSections()
         isLoading = false
     }
-
+    
     func favourite(_ recipe: Recipe) {
         persistenceService.addFavourite(recipe)
         favouriteRecipes = persistenceService.getFavourites()
         updateSections()
     }
-
+    
     func unfavourite(_ recipe: Recipe) {
         persistenceService.removeFavourite(recipe)
         favouriteRecipes = persistenceService.getFavourites()
@@ -52,30 +58,33 @@ class RecipesViewModel: ObservableObject {
     }
     
     func isFavourite(_ recipe: Recipe) -> Bool {
-         return persistenceService.isFavourite(recipe)
+        persistenceService.isFavourite(recipe)
     }
-
+    
     private func updateSections() {
+        let otherRecipes = fetchedRecipes.filter { !favouriteRecipes.contains($0) }
         recipeSections = [
             RecipeSection(type: .favourited, recipes: favouriteRecipes),
-            RecipeSection(type: .other, recipes: fetchedRecipes.filter { !favouriteRecipes.contains($0) })
+            RecipeSection(type: .other, recipes: otherRecipes)
         ]
     }
 }
 
-struct RecipeSection {
+struct RecipeSection: Equatable {
     let type: RecipeSectionType
     let recipes: [Recipe]
 }
 
-enum RecipeSectionType {
+enum RecipeSectionType: Equatable {
     case favourited
     case other
-
-    var title: String {
+    case error(String)
+    
+    var title: String? {
         switch self {
         case .favourited: return "Favourites"
         case .other: return "Other Recipes"
+        case .error: return nil
         }
     }
 }
