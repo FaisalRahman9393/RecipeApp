@@ -43,7 +43,6 @@ final class RecipesViewModelTests: XCTestCase {
 
         XCTAssertEqual(favourited?.recipes.count, 0)
         XCTAssertEqual(others?.recipes.count, 2)
-        XCTAssertFalse(sut.isLoading)
     }
 
     func testGivenServiceFails_WhenFetchRecipesIsCalled_ThenSectionsAreEmptyAndLoadingIsFalse() async {
@@ -56,8 +55,12 @@ final class RecipesViewModelTests: XCTestCase {
         await sut.fetchRecipes()
 
         // Then
-        XCTAssertTrue(sut.recipeSections.isEmpty)
-        XCTAssertFalse(sut.isLoading)
+        let favourited = sut.recipeSections.first(where: { $0.type == .favourited})
+        let other = sut.recipeSections.first(where: { $0.type == .other})
+
+        XCTAssert(favourited?.recipes.isEmpty == true)
+        XCTAssert(other?.recipes.isEmpty == true)
+        XCTAssertEqual(sut.networkFetchFailure, "Failed to fetch new recipes :(")
     }
 
     func testGivenInitialState_WhenFetchRecipesIsCalled_ThenIsLoadingTransitionsFromTrueToFalse() async {

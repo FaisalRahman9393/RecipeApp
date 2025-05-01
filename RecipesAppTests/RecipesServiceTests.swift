@@ -73,10 +73,10 @@ final class RecipesServiceTests: XCTestCase {
         XCTAssertEqual(pizza.image, "https://example.com/pizza.jpg")
         XCTAssertEqual(pizza.description, "test description pizza")
         XCTAssertEqual(pizza.instructions, ["test display test pizza"])
-        XCTAssertEqual(pizza.calories, 111)
-        XCTAssertEqual(pizza.fat, 222)
-        XCTAssertEqual(pizza.protein, 333)
-        XCTAssertEqual(pizza.carbs, 555)
+        XCTAssertEqual(pizza.calories, "111 kcal")
+        XCTAssertEqual(pizza.fat, "222 g")
+        XCTAssertEqual(pizza.protein, "333 g")
+        XCTAssertEqual(pizza.carbs, "555 g")
 
         let burger = recipes[1]
         XCTAssertEqual(burger.id, 2)
@@ -84,10 +84,10 @@ final class RecipesServiceTests: XCTestCase {
         XCTAssertEqual(burger.image, "https://example.com/burger.jpg")
         XCTAssertEqual(burger.description, "test description burger")
         XCTAssertEqual(burger.instructions, ["test display test burger"])
-        XCTAssertEqual(burger.calories, 777)
-        XCTAssertEqual(burger.fat, 888)
-        XCTAssertEqual(burger.protein, 999)
-        XCTAssertEqual(burger.carbs, 122)
+        XCTAssertEqual(burger.calories, "777 kcal")
+        XCTAssertEqual(burger.fat, "888 g")
+        XCTAssertEqual(burger.protein, "999 g")
+        XCTAssertEqual(burger.carbs, "122 g")
     }
 }
 

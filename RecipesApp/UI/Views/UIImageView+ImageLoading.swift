@@ -18,7 +18,7 @@ extension UIImageView {
         }
 
         var request = URLRequest(url: url)
-        request.timeoutInterval = 5.0  // Set timeout to 5 seconds
+        request.timeoutInterval = 5.0 
 
         do {
             let (data, _) = try await URLSession.shared.data(for: request)

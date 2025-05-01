@@ -11,6 +11,7 @@ import Foundation
 class RecipesViewModel: ObservableObject {
     @Published var isLoading: Bool = true
     @Published var recipeSections: [RecipeSection] = []
+    @Published var networkFetchFailure: String?
     
     private var favouriteRecipes: [Recipe] = []
     private var fetchedRecipes: [Recipe] = []
@@ -30,8 +31,9 @@ class RecipesViewModel: ObservableObject {
         do {
             self.fetchedRecipes = try await recipesService.fetchRecipes()
         } catch {
-            // ignore for now
+            self.networkFetchFailure = "Failed to fetch new recipes :("
         }
+        
         self.favouriteRecipes = persistenceService.getFavourites()
         updateSections()
         isLoading = false
@@ -84,8 +86,8 @@ struct Recipe: Codable, Equatable {
     let image: String?
     let description: String?
     let instructions: [String]
-    let calories: Int?
-    let fat: Int?
-    let protein: Int?
-    let carbs: Int?
+    let calories: String
+    let fat: String
+    let protein: String
+    let carbs: String
 }

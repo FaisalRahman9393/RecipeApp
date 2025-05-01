@@ -84,9 +84,9 @@ func makeRecipe(id: Int = .random(in: 1...10000),
                 image: String? = "testImage",
                 description: String? = "testDescription",
                 instructions: [String] = ["testInstruction"],
-                calories: Int? = 100,
-                fat: Int? = 10,
-                protein: Int? = 5,
-                carbs: Int? = 20) -> Recipe {
+                calories: String = "test calories",
+                fat: String = "test fat",
+                protein: String = "test protein",
+                carbs: String = "test carbs") -> Recipe {
     return Recipe(id: id, name: name, image: image, description: description, instructions: instructions, calories: calories, fat: fat, protein: protein, carbs: carbs)
 }

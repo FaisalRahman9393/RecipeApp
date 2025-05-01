@@ -26,15 +26,16 @@ struct RecipesServiceImpl: RecipesService {
         
         let results = try JSONDecoder().decode(RecipesResponse.self, from: data).results
         
-        return results.compactMap { Recipe(id: $0.id,
-                                           name: $0.name,
-                                           image: $0.thumbnailURL,
-                                           description: $0.description,
-                                           instructions: $0.instructions.map { $0.displayText },
-                                           calories: $0.nutrition?.calories,
-                                           fat: $0.nutrition?.fat,
-                                           protein: $0.nutrition?.protein,
-                                           carbs: $0.nutrition?.carbohydrates)
+        return results.compactMap {
+            Recipe(id: $0.id,
+                   name: $0.name,
+                   image: $0.thumbnailURL,
+                   description: $0.description,
+                   instructions: $0.instructions.map { $0.displayText },
+                   calories: $0.nutrition?.calories.map { "\($0) kcal" } ?? "",
+                   fat: $0.nutrition?.fat.map { "\($0) g" } ?? "",
+                   protein: $0.nutrition?.protein.map { "\($0) g" } ?? "",
+                   carbs: $0.nutrition?.carbohydrates.map { "\($0) g" } ?? "")
         }
     }
 }
@@ -54,7 +55,7 @@ struct RecipesResponse: Decodable {
         let thumbnailURL: String?
         let instructions: [Instruction]
         let nutrition: Nutrition?
-
+        
         enum CodingKeys: String, CodingKey {
             case id
             case name
