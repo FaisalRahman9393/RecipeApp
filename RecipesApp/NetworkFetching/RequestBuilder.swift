@@ -29,6 +29,7 @@ struct RecipesRequestBuilder: RequestBuilder {
         request.httpMethod = "GET"
         request.setValue("tasty.p.rapidapi.com", forHTTPHeaderField: "x-rapidapi-host")
         request.setValue(rapidAPIKey, forHTTPHeaderField: "x-rapidapi-key")
+        request.timeoutInterval = 5
         return request
     }
 }

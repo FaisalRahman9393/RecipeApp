@@ -29,11 +29,11 @@ class RecipesViewModel: ObservableObject {
         isLoading = true
         do {
             self.fetchedRecipes = try await recipesService.fetchRecipes()
-            self.favouriteRecipes = persistenceService.getFavourites()
-            updateSections()
         } catch {
             // ignore for now
         }
+        self.favouriteRecipes = persistenceService.getFavourites()
+        updateSections()
         isLoading = false
     }
 

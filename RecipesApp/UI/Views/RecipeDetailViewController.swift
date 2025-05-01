@@ -62,6 +62,12 @@ class RecipeDetailViewController: UIViewController {
             .joined(separator: "\n\n")
         
         instructions.text = formattedInstructions
+        
+        if let imageURL = recipe.image {
+            Task {
+                await recipeImageView.loadImage(from: imageURL)
+            }
+        }
     }
     
     private func setupNavBar() {
